@@ -48,11 +48,32 @@ pipeline:
                   spec:
                     shell: Sh
                     command: |-
-                      PR_NUMBER=$(echo "$HARNESS_TRIGGER_PAYLOAD" | jq -r '.pullrequest.id')
-                      echo "Latest PR Number: $PR_NUMBER"
-                      PR_NUMBER=$(echo "$HARNESS_TRIGGER_PAYLOAD" | jq -r '.pullrequest.id')
-                      echo "Latest PR Number: $PR_NUMBER"
-                      echo $HARNESS_TRIGGER_PAYLOAD
+                      #!/bin/bash
+                      # Usage: ./extract_pr_number.sh payload.json
+
+                      if [ $# -ne 1 ]; then
+                        echo "Usage: $0 <payload.json>"
+                        exit 1
+                      fi
+
+                      PAYLOAD_FILE="$1"
+
+                      # Check if jq is installed
+                      if ! command -v jq &> /dev/null; then
+                        echo "jq command could not be found. Please install jq to parse JSON."
+                        exit 1
+                      fi
+
+                      # Extract the PR number from the payload.
+                      # This example assumes the webhook payload contains the key "pull_request.number"
+                      PR_NUMBER=$(jq -r '.pull_request.number' "$PAYLOAD_FILE")
+
+                      if [ "$PR_NUMBER" = "null" ] || [ -z "$PR_NUMBER" ]; then
+                        echo "No PR number found in the payload."
+                        exit 1
+                      fi
+
+                      echo "Extracted PR Number: $PR_NUMBER"
         delegateSelectors:
           - gcp-delegate-p
   notificationRules:
