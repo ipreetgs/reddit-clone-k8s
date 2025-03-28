@@ -54,12 +54,7 @@ pipeline:
                       #!/bin/bash
                       # Usage: ./extract_pr_metadata_from_url.sh <webhook_url>
 
-                      if [ $# -ne 1 ]; then
-                        echo "Usage: $0 https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ"
-                        exit 1
-                      fi
-
-                      WEBHOOK_URL="$1"
+                      WEBHOOK_URL="https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ"
 
                       # Check if jq is installed
                       if ! command -v jq &> /dev/null; then
