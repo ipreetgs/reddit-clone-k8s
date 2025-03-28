@@ -50,6 +50,7 @@ pipeline:
                     command: |-
                       PR_NUMBER=$(echo "$HARNESS_TRIGGER_PAYLOAD" | jq -r '.pullrequest.id')
                       echo "Latest PR Number: $PR_NUMBER"
+                      echo $HARNESS_TRIGGER_PAYLOAD
         delegateSelectors:
           - gcp-delegate-p
   notificationRules:
