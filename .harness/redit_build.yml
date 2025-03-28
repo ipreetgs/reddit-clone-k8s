@@ -57,10 +57,10 @@ pipeline:
                       WEBHOOK_URL="https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ"
 
                       # Check if jq is installed
-                      if ! command -v jq &> /dev/null; then
-                        echo "jq is required but not installed. Please install jq to continue."
-                        exit 1
-                      fi
+                      # if ! command -v jq &> /dev/null; then
+                      #   echo "jq is required but not installed. Please install jq to continue."
+                      #   exit 1
+                      # fi
 
                       echo "Fetching webhook payload from URL: $WEBHOOK_URL"
                       PAYLOAD=$(curl -s "$WEBHOOK_URL")
