@@ -1,0 +1,43 @@
+pipeline:
+  name: redit_app_CI
+  identifier: redit_app_CI
+  projectIdentifier: DemoTx
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.Github_OAuth_1702454216196
+        repoName: ipreetgs/reddit-clone-k8s
+        build: <+input>
+  stages:
+    - stage:
+        name: Build and Scan
+        identifier: Build_and_Scan
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Docker
+            spec: {}
+          sharedPaths:
+            - /harness/data
+          caching:
+            enabled: false
+            paths: []
+          buildIntelligence:
+            enabled: false
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Pre_build
+                  identifier: Pre_build
+                  spec:
+                    shell: Sh
+                    command: echo "Pipeline is working"
+                  description: checking the connection
