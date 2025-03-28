@@ -41,3 +41,13 @@ pipeline:
                     shell: Sh
                     command: echo "Pipeline is working"
                   description: checking the connection
+  notificationRules:
+    - name: notify
+      identifier: notify
+      pipelineEvents:
+        - type: AllEvents
+      notificationMethod:
+        type: Webhook
+        spec:
+          webhookUrl: https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ
+      enabled: true
