@@ -39,7 +39,9 @@ pipeline:
                   identifier: Pre_build
                   spec:
                     shell: Sh
-                    command: echo "Pipeline is working"
+                    command: |-
+                      echo "Pipeline is working"
+                      echo "Webhook Payload: $HARNESS_TRIGGER_PAYLOAD"
                   description: checking the connection
               - step:
                   type: Run
