@@ -49,62 +49,53 @@ pipeline:
                     shell: Sh
                     command: |-
                       #!/bin/bash
-                      # Usage: ./fetch_pr_metadata.sh <github_owner> <repo_name> [<github_token>]
+                      # Usage: ./extract_pr_metadata_from_url.sh <webhook_url>
 
-                      if [ $# -lt 2 ]; then
-                        echo "Usage: $0 <github_owner> <repo_name> [<github_token>]"
+                      if [ $# -ne 1 ]; then
+                        echo "Usage: $0 https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ"
                         exit 1
                       fi
 
-                      OWNER="$1"
-                      REPO="$2"
-                      TOKEN="${3:-}"
+                      WEBHOOK_URL="$1"
 
-                      # Step 1: Extract merged PR commit messages.
-                      echo "Extracting merged PR commit messages from git history..."
-                      MERGED_COMMITS=$(git log --merges --pretty=format:"%s")
-
-                      # Step 2: Extract unique PR numbers from the commit messages.
-                      # Assumes commit messages follow the pattern "Merge pull request #<number>"
-                      PR_NUMBERS=$(echo "$MERGED_COMMITS" | grep -oE '#[0-9]+' | tr -d '#' | sort -u)
-
-                      if [ -z "$PR_NUMBERS" ]; then
-                        echo "No PR numbers found in merge commit messages."
-                        exit 0
+                      # Check if jq is installed
+                      if ! command -v jq &> /dev/null; then
+                        echo "jq is required but not installed. Please install jq to continue."
+                        exit 1
                       fi
 
-                      NUM_PR=$(echo "$PR_NUMBERS" | wc -w)
-                      echo "Total merged PRs found: $NUM_PR"
-                      echo
+                      echo "Fetching webhook payload from URL: $WEBHOOK_URL"
+                      PAYLOAD=$(curl -s "$WEBHOOK_URL")
 
-                      # Step 3: For each PR number, fetch details from the GitHub API.
-                      for pr in $PR_NUMBERS; do
-                        echo "Fetching details for PR #$pr..."
-                        API_URL="https://api.github.com/repos/${OWNER}/${REPO}/pulls/${pr}"
-                        
-                        if [ -n "$TOKEN" ]; then
-                          RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "$API_URL")
-                        else
-                          RESPONSE=$(curl -s "$API_URL")
-                        fi
-                        
-                        # Using jq to extract metadata.
-                        TITLE=$(echo "$RESPONSE" | jq -r '.title')
-                        CREATED_BY=$(echo "$RESPONSE" | jq -r '.user.login')
-                        MERGED_BY=$(echo "$RESPONSE" | jq -r '.merged_by.login')
-                        CREATED_AT=$(echo "$RESPONSE" | jq -r '.created_at')
-                        MERGED_AT=$(echo "$RESPONSE" | jq -r '.merged_at')
-                        MERGE_SHA=$(echo "$RESPONSE" | jq -r '.merge_commit_sha')
-                        
-                        echo "PR #$pr:"
-                        echo "  Title           : $TITLE"
-                        echo "  Created By      : $CREATED_BY"
-                        echo "  Merged By       : $MERGED_BY"
-                        echo "  Created At      : $CREATED_AT"
-                        echo "  Merged At       : $MERGED_AT"
-                        echo "  Merge Commit SHA: $MERGE_SHA"
-                        echo
-                      done
+                      if [ -z "$PAYLOAD" ]; then
+                        echo "No data received from the URL."
+                        exit 1
+                      fi
+
+                      echo "Extracting PR metadata from payload..."
+
+                      # Extract metadata using jq. Adjust key paths as needed.
+                      PR_NUMBER=$(echo "$PAYLOAD" | jq -r '.pull_request.number // empty')
+                      PR_TITLE=$(echo "$PAYLOAD" | jq -r '.pull_request.title // empty')
+                      CREATED_BY=$(echo "$PAYLOAD" | jq -r '.pull_request.user.login // empty')
+                      MERGED_BY=$(echo "$PAYLOAD" | jq -r '.pull_request.merged_by.login // empty')
+                      CREATED_AT=$(echo "$PAYLOAD" | jq -r '.pull_request.created_at // empty')
+                      MERGED_AT=$(echo "$PAYLOAD" | jq -r '.pull_request.merged_at // empty')
+                      MERGE_COMMIT_SHA=$(echo "$PAYLOAD" | jq -r '.pull_request.merge_commit_sha // empty')
+
+                      if [ -z "$PR_NUMBER" ]; then
+                        echo "No PR number found in the payload."
+                        exit 1
+                      fi
+
+                      echo "PR Metadata:"
+                      echo "  PR Number       : $PR_NUMBER"
+                      echo "  Title           : $PR_TITLE"
+                      echo "  Created By      : $CREATED_BY"
+                      echo "  Merged By       : $MERGED_BY"
+                      echo "  Created At      : $CREATED_AT"
+                      echo "  Merged At       : $MERGED_AT"
+                      echo "  Merge Commit SHA: $MERGE_COMMIT_SHA"
         delegateSelectors:
           - gcp-delegate-p
   notificationRules:
