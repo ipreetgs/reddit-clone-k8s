@@ -49,31 +49,62 @@ pipeline:
                     shell: Sh
                     command: |-
                       #!/bin/bash
-                      # Usage: ./extract_pr_number.sh payload.json
+                      # Usage: ./fetch_pr_metadata.sh <github_owner> <repo_name> [<github_token>]
 
-                      if [ $# -ne 1 ]; then
-                        echo "Usage: $0 <payload.json>"
+                      if [ $# -lt 2 ]; then
+                        echo "Usage: $0 <github_owner> <repo_name> [<github_token>]"
                         exit 1
                       fi
 
-                      PAYLOAD_FILE="$1"
+                      OWNER="$1"
+                      REPO="$2"
+                      TOKEN="${3:-}"
 
-                      # Check if jq is installed
-                      if ! command -v jq &> /dev/null; then
-                        echo "jq command could not be found. Please install jq to parse JSON."
-                        exit 1
+                      # Step 1: Extract merged PR commit messages.
+                      echo "Extracting merged PR commit messages from git history..."
+                      MERGED_COMMITS=$(git log --merges --pretty=format:"%s")
+
+                      # Step 2: Extract unique PR numbers from the commit messages.
+                      # Assumes commit messages follow the pattern "Merge pull request #<number>"
+                      PR_NUMBERS=$(echo "$MERGED_COMMITS" | grep -oE '#[0-9]+' | tr -d '#' | sort -u)
+
+                      if [ -z "$PR_NUMBERS" ]; then
+                        echo "No PR numbers found in merge commit messages."
+                        exit 0
                       fi
 
-                      # Extract the PR number from the payload.
-                      # This example assumes the webhook payload contains the key "pull_request.number"
-                      PR_NUMBER=$(jq -r '.pull_request.number' "$PAYLOAD_FILE")
+                      NUM_PR=$(echo "$PR_NUMBERS" | wc -w)
+                      echo "Total merged PRs found: $NUM_PR"
+                      echo
 
-                      if [ "$PR_NUMBER" = "null" ] || [ -z "$PR_NUMBER" ]; then
-                        echo "No PR number found in the payload."
-                        exit 1
-                      fi
-
-                      echo "Extracted PR Number: $PR_NUMBER"
+                      # Step 3: For each PR number, fetch details from the GitHub API.
+                      for pr in $PR_NUMBERS; do
+                        echo "Fetching details for PR #$pr..."
+                        API_URL="https://api.github.com/repos/${OWNER}/${REPO}/pulls/${pr}"
+                        
+                        if [ -n "$TOKEN" ]; then
+                          RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "$API_URL")
+                        else
+                          RESPONSE=$(curl -s "$API_URL")
+                        fi
+                        
+                        # Using jq to extract metadata.
+                        TITLE=$(echo "$RESPONSE" | jq -r '.title')
+                        CREATED_BY=$(echo "$RESPONSE" | jq -r '.user.login')
+                        MERGED_BY=$(echo "$RESPONSE" | jq -r '.merged_by.login')
+                        CREATED_AT=$(echo "$RESPONSE" | jq -r '.created_at')
+                        MERGED_AT=$(echo "$RESPONSE" | jq -r '.merged_at')
+                        MERGE_SHA=$(echo "$RESPONSE" | jq -r '.merge_commit_sha')
+                        
+                        echo "PR #$pr:"
+                        echo "  Title           : $TITLE"
+                        echo "  Created By      : $CREATED_BY"
+                        echo "  Merged By       : $MERGED_BY"
+                        echo "  Created At      : $CREATED_AT"
+                        echo "  Merged At       : $MERGED_AT"
+                        echo "  Merge Commit SHA: $MERGE_SHA"
+                        echo
+                      done
         delegateSelectors:
           - gcp-delegate-p
   notificationRules:
