@@ -41,6 +41,8 @@ pipeline:
                     shell: Sh
                     command: echo "Pipeline is working"
                   description: checking the connection
+        delegateSelectors:
+          - gcp-delegate-p
   notificationRules:
     - name: notify
       identifier: notify
