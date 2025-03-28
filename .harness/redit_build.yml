@@ -41,6 +41,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       echo "Pipeline is working"
+                      echo "Dsd"
                       echo "Webhook Payload: $HARNESS_TRIGGER_PAYLOAD"
                   description: checking the connection
               - step:
