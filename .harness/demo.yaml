@@ -1,0 +1,14 @@
+inputSet:
+  name: demo
+  identifier: demo
+  orgIdentifier: default
+  projectIdentifier: DemoTx
+  pipeline:
+    identifier: redit_app_CI
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
