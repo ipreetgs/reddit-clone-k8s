@@ -96,6 +96,7 @@ pipeline:
                       echo "  Merge Commit SHA: $MERGE_COMMIT_SHA"
         delegateSelectors:
           - gcp-delegate-p
+          - aws-delegate-p
   notificationRules:
     - name: notify
       identifier: notify
