@@ -42,7 +42,13 @@ pipeline:
                     command: |-
                       echo "Pipeline is working"
                       echo "Dsd"
+                      name=<+pipeline.variables.name>
+                      export greet="hello"
                       echo "Webhook Payload: $HARNESS_TRIGGER_PAYLOAD"
+                    outputVariables:
+                      - name: greet
+                        type: String
+                        value: <+input>
                   description: checking the connection
               - step:
                   type: Run
@@ -107,3 +113,9 @@ pipeline:
         spec:
           webhookUrl: https://app.harness.io/gateway/ng/api/webhook?accountIdentifier=Oz0uv9cjTYWx7zK2aogXCQ
       enabled: true
+  variables:
+    - name: name
+      type: String
+      description: ""
+      required: false
+      value: hello
