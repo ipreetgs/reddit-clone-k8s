@@ -7,7 +7,7 @@ pipeline {
     }
  tools {
         git 'Default'  
-        dockerTool 'Default'
+        dockerTool
     }
  environment {
         REPORT_NAME = 'trivy-report.html'
