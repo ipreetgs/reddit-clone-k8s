@@ -22,6 +22,7 @@ pipeline {
                     sh 'echo "Hello from a dynamic Kubernetes pod!"'
                 }
             }
+            }
         }
     }
 }
