@@ -7,6 +7,7 @@ pipeline {
     }
  tools {
         git 'Default'  
+    }
     stages {
         stage('Clone Codebase') {
             steps {
@@ -24,5 +25,5 @@ pipeline {
             }
             }
         }
-    }
 }
+
