@@ -5,6 +5,10 @@ pipeline {
             defaultContainer 'jnlp'
         }
     }
+ tools {
+        git 'Default'         // The Git installation name configured in Jenkins
+        dockerTool 'Docker'   // The Docker installation name configured in Jenkins
+    }
     stages {
         stage('Clone Codebase') {
             steps {
