@@ -6,6 +6,14 @@ pipeline {
         }
     }
     stages {
+        stage('Clone Codebase') {
+            steps {
+                container('jnlp') {
+                    git branch: 'main',
+                        url: 'https://github.com/your-username/your-repo.git'
+                }
+            }
+        }
         stage('Test') {
             steps {
                 container('jnlp') {
