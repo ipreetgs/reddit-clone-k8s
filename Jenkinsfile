@@ -48,11 +48,11 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            archiveArtifacts artifacts: "${REPORT_NAME}", fingerprint: true
-        }
-    }
+    // post {
+    //     always {
+    //         archiveArtifacts artifacts: "${REPORT_NAME}", fingerprint: true
+    //     }
+    // }
 
         
 }
