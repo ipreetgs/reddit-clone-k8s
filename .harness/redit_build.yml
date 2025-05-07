@@ -12,6 +12,21 @@ pipeline:
         build: <+input>
   stages:
     - stage:
+        name: Status Email
+        identifier: Status_Email
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: PR-Email
+                  identifier: PREmail
+                  template:
+                    templateRef: Email
+                    versionLabel: v1.0
+        tags: {}
+    - stage:
         name: Build and Scan
         identifier: Build_and_Scan
         description: ""
