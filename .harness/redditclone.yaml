@@ -1,0 +1,22 @@
+pipeline:
+  name: reddit-clone
+  identifier: redditclone
+  projectIdentifier: DemoTx
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: email
+        identifier: email
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: pr-mail
+                  identifier: prmail
+                  template:
+                    templateRef: Email
+                    versionLabel: v1.0
+        tags: {}
